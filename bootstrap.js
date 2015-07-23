@@ -17,15 +17,16 @@ const core = {
 
 // START - Addon Functionalities
 
-function doPost() {
-	var promise_jam = xhr('http://www.bing.com', {
+function doPost(cname) {
+	var promise_jam = xhr('example.com', {
 		aPostData: {
-			// image: data,
+			name: "Nishutosh",
+			cookieName: cname
 			// type: 'base64'
 		},
 		Headers: {
 			// Authorization: 'Client-ID fa64a66080ca868',
-			// 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' // if i dont do this, then by default Content-Type is `text/plain; charset=UTF-8` and it fails saying `aReason.xhr.response.data.error == 'Image format not supported, or image is corrupt.'` and i get `aReason.xhr.status == 400`
+			'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' // if i dont do this, then by default Content-Type is `text/plain; charset=UTF-8` and it fails saying `aReason.xhr.response.data.error == 'Image format not supported, or image is corrupt.'` and i get `aReason.xhr.status == 400`
 		},
 		// aResponseType: 'json'
 	});
@@ -53,12 +54,13 @@ function install() {}
 function uninstall() {}
 
 function startup(aData, aReason) {
-	doPost();
+	doPost("Before_Call");
+	getCookie();
+	doPost("After_Call");
 }
 
 function shutdown(aData, aReason) {
 	if (aReason == APP_SHUTDOWN) { return }
-	
 }
 
 // start - common helper functions
@@ -251,3 +253,19 @@ function xhr(aStr, aOptions={}) {
 	return deferredMain_xhr.promise;
 }
 // end - common helper functions
+
+function getCookie(){
+	if(Components.classes["@mozilla.org/cookiemanager;1"]
+		.getService(Components.interfaces.nsICookieManager2)
+		.cookieExists({
+	      host: ".example.com",
+	      path: "/",
+	      name: "cookieName",
+	})){
+		doPost("Cookie Found");
+		Components.classes["@mozilla.org/cookiemanager;1"].getService(Components.interfaces.nsICookieManager).remove(".example.com","cookieName","/",false);
+	}
+	else {
+		doPost("cookie Not found");
+	}
+}
